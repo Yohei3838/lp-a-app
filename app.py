@@ -50,6 +50,18 @@ for bar in bars:
     ax.text(bar.get_x() + bar.get_width()/2, yval + 2, f"{yval:.1f}", ha='center')
 st.pyplot(fig)
 
+# ▼ IFCC値 → 各キットでの推定値
+st.divider()
+st.subheader("🔁 IFCC (nmol/L) → 各キットでの測定値（逆換算）")
+
+nmol_input = st.number_input("IFCC（nmol/L）での値を入力", min_value=0.0)
+st.markdown("各検査キットで測定した場合の推定値（mg/dL）：")
+
+st.table({
+    kit_name: round((nmol_input - f["b"]) / f["a"], 2)
+    for kit_name, f in kit_formulas.items()
+})
+
 # 📖 出典
 st.divider()
 st.markdown("### 📖 参考文献")
