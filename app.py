@@ -4,7 +4,7 @@ import streamlit as st
 st.set_page_config(page_title="Lp(a) 換算アプリ", layout="centered")
 
 # タイトルと説明
-st.title("Lp(a) 換算アプリ（双方向）")
+st.title("Lp(a) 値換算アプリ")
 st.markdown("""
 このアプリでは、検査キットによって異なるLp(a)の値を  
 **国際基準（IFCC, nmol/L）** と **従来の単位（mg/dL）** の間で自由に変換できます。
