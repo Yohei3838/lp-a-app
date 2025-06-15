@@ -39,12 +39,12 @@ st.markdown(f"### 参考換算（2.2倍法）：**{old_estimate:.2f} nmol/L**")
 # 📊 グラフ表示
 fig, ax = plt.subplots()
 bars = ax.bar(
-    ["IFCC換算", "2.2倍法換算"], 
+    ["IFCC conversion", "Simple 2.2x conversion"], 
     [ifcc_nmol, old_estimate],
     color=["#1f77b4", "#ff7f0e"]
 )
 ax.set_ylabel("Lp(a) 値（nmol/L）")
-ax.set_title("IFCC vs 2.2倍法による換算値の比較")
+ax.set_title("IFCC vs 2.2x conversion")
 for bar in bars:
     yval = bar.get_height()
     ax.text(bar.get_x() + bar.get_width()/2, yval + 2, f"{yval:.1f}", ha='center')
