@@ -55,7 +55,7 @@ fig, ax = plt.subplots()
 bars = ax.bar(
     [
         "IFCC conversion (nmol/L)",
-        "2.2x conversion\n(従来の概算: 2~2.5倍, 今回は2.2倍で計算)"
+        "2.2x conversion (nmol/L)"
     ],
     [converted, old_estimate],
     color=["#2ca02c", "#ff7f0e"]
