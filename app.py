@@ -43,7 +43,7 @@ risk_html += "</table>"
 st.markdown(risk_html, unsafe_allow_html=True)
 
 st.markdown("""
-本アプリでは検査キット値（mg/dL）→論文式によるIFCC基準値（nmol/L）に換算し、そのままリスク分類もカラー表示します。  
+本アプリでは検査キット値（mg/dL）→論文式によるIFCC基準値（nmol/L）に換算し、リスク分類します。  
 2.2倍法（従来法）との比較グラフも表示します。
 """)
 
@@ -76,15 +76,15 @@ st.markdown(
 # グラフ（2.2倍法と論文換算の2値）
 fig, ax = plt.subplots()
 bars = ax.bar(
-    ["IFCC換算 (nmol/L)", "2.2倍法 (nmol/L)\n(従来の概算: 2~2.5倍, 今回は2.2倍で計算)"],
+    ["IFCC conversion (nmol/L)", "2.2x conversion (nmol/L)"],
     [converted, old_estimate],
     color=["#2ca02c", "#ff7f0e"]
 )
 for bar in bars:
     yval = bar.get_height()
     ax.text(bar.get_x() + bar.get_width()/2, yval + 2, f"{yval:.1f}", ha='center')
-ax.set_ylabel("Lp(a)値")
-ax.set_title("換算値の比較")
+ax.set_ylabel("Lp(a) level")
+ax.set_title("Comparison of conversions")
 st.pyplot(fig)
 
 st.caption("※『2.2倍法』は従来使われてきた概算（mg/dL×2~2.5）。ここでは2.2倍で計算しています。")
