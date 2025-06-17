@@ -83,7 +83,7 @@ with col2:
     st.markdown(f"<div style='background:{risk_color_x22};padding:16px;border-radius:10px;width:90%;font-weight:bold;text-align:center;margin-bottom:10px'>{risk_class_x22}<br><span style='font-size:14px;'>({x22:.2f} nmol/L)</span></div>", unsafe_allow_html=True)
 
 if unit != "nmol/L" and risk_idx_x22 < risk_idx_ifcc:
-    st.warning("⚠️ 2.2倍法ではリスク分類が過小評価される場合があります。必ずIFCC換算値でリスク評価をしてください。")
+    st.warning("⚠️ 従来の換算ではリスク分類が過小評価される場合があります。IFCC換算値でのリスク評価を考慮してください。")
 
 # グラフ（ラベルのみ英語）
 fig, ax = plt.subplots()
