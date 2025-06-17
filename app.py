@@ -1,6 +1,14 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 
+# リスク分類と色リスト（低→高リスク順）
+risk_table = [
+    {"範囲": "＜75 nmol/L",      "分類": "Low Risk（低リスク）",      "色": "#b7e4c7"},
+    {"範囲": "75～124 nmol/L",  "分類": "Moderate Risk（中等度リスク）", "色": "#ffe066"},
+    {"範囲": "125～174 nmol/L", "分類": "High Risk（高リスク）",     "色": "#f4978e"},
+    {"範囲": "≧175 nmol/L",     "分類": "Very High Risk（超高リスク）",  "色": "#d7263d"},
+]
+
 # 換算式の辞書（論文式）
 kit_formulas = {
     "Sekisui":   {"a": 3.77, "b": -2.39},
@@ -11,23 +19,32 @@ kit_formulas = {
     "Roche":     {"a": 1.00, "b":  0.00},
 }
 
-# リスク分類＋色付きメッセージ
+# リスク分類
 def classify_lpa_risk(nmolL):
     if nmolL < 75:
-        return "Low Risk（低リスク）", "success"
+        return 0
     elif nmolL < 125:
-        return "Moderate Risk（中等度リスク）", "info"
+        return 1
     elif nmolL < 175:
-        return "High Risk（高リスク）", "warning"
+        return 2
     else:
-        return "Very High Risk（超高リスク）", "error"
+        return 3
 
-st.set_page_config(page_title="Lp(a) Conversion & Risk Classification App", layout="centered")
-st.title("Lp(a) Conversion & Risk Classification App")
+st.set_page_config(page_title="Lp(a) 換算＆リスク判定アプリ", layout="centered")
+st.title("Lp(a) 換算 & リスク分類アプリ")
+
+st.markdown("#### Lp(a) リスク分類一覧")
+
+# ▼ リスク分類表（グラデ色つきHTML）
+risk_html = "<table style='width:100%; text-align:center; border-radius:10px; border-collapse:separate; border-spacing:5px;'>"
+risk_html += "<tr>" + "".join([f"<th style='padding:7px;'>{row['範囲']}</th>" for row in risk_table]) + "</tr>"
+risk_html += "<tr>" + "".join([f"<td style='background:{row['色']};padding:12px; border-radius:8px; font-weight:bold'>{row['分類']}</td>" for row in risk_table]) + "</tr>"
+risk_html += "</table>"
+st.markdown(risk_html, unsafe_allow_html=True)
 
 st.markdown("""
-検査キットの測定値（mg/dL）を**論文式でIFCC基準値（nmol/L）に換算し、そのままリスク分類まで自動表示します**。  
-また、従来の2.2倍法（mg/dL×2.2）ともグラフで比較できます。
+本アプリでは検査キット値（mg/dL）→論文式によるIFCC基準値（nmol/L）に換算し、そのままリスク分類もカラー表示します。  
+2.2倍法（従来法）との比較グラフも表示します。
 """)
 
 st.divider()
@@ -42,29 +59,32 @@ b = kit_formulas[kit]["b"]
 converted = a * value + b  # 論文式によるIFCC換算
 old_estimate = value * 2.2  # 従来の2.2倍法
 
-st.markdown(f"**IFCC conversion：{converted:.2f} nmol/L**")
-st.markdown(f"**2.2x conversion）：{old_estimate:.2f} nmol/L**")
+st.markdown(f"**IFCC換算後：{converted:.2f} nmol/L**")
+st.markdown(f"**2.2倍法（従来の概算値）：{old_estimate:.2f} nmol/L**")
 
-# そのままリスク分類
-risk_text, risk_color = classify_lpa_risk(converted)
+# リスク分類インデックス＆カラー
+risk_idx = classify_lpa_risk(converted)
+risk_class = risk_table[risk_idx]["分類"]
+risk_color = risk_table[risk_idx]["色"]
+
 st.markdown("**リスク分類：**")
-getattr(st, risk_color)(risk_text)
+st.markdown(
+    f"<div style='background:{risk_color};padding:16px;border-radius:10px;width:70%;font-weight:bold;text-align:center;margin-bottom:10px'>{risk_class}</div>",
+    unsafe_allow_html=True
+)
 
 # グラフ（2.2倍法と論文換算の2値）
 fig, ax = plt.subplots()
 bars = ax.bar(
-    [
-        "IFCC conversion (nmol/L)",
-        "2.2x conversion (nmol/L)"
-    ],
+    ["IFCC換算 (nmol/L)", "2.2倍法 (nmol/L)\n(従来の概算: 2~2.5倍, 今回は2.2倍で計算)"],
     [converted, old_estimate],
     color=["#2ca02c", "#ff7f0e"]
 )
 for bar in bars:
     yval = bar.get_height()
     ax.text(bar.get_x() + bar.get_width()/2, yval + 2, f"{yval:.1f}", ha='center')
-ax.set_ylabel("Lp(a) level")
-ax.set_title("Comparison of conversions")
+ax.set_ylabel("Lp(a)値")
+ax.set_title("換算値の比較")
 st.pyplot(fig)
 
 st.caption("※『2.2倍法』は従来使われてきた概算（mg/dL×2~2.5）。ここでは2.2倍で計算しています。")
@@ -85,13 +105,13 @@ with st.expander("🔄 IFCC(nmol/L)から各キット値(mg/dL)への逆換算�
         }
         st.table(table_data)
 
-st.info("参考: [Lp(a) Clinical Guidance](https://www.lpaclinicalguidance.com/)")
 
 st.divider()
-st.markdown("### 📖 参考文献")
+st.markdown("### 📖 参考文献・サイト")
 st.markdown("""
 Miida, T. et al. (2025).  
 *Harmonization of Lipoprotein(a) Immunoassays Using A Serum Panel...*  
 Journal of Atherosclerosis and Thrombosis, 32:580–595.  
 DOI: [10.5551/jat.65238](https://doi.org/10.5551/jat.65238)
 """)
+st.info(" [Lp(a) Clinical Guidance](https://www.lpaclinicalguidance.com/)")
