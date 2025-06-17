@@ -117,32 +117,27 @@ DOI: [10.5551/jat.65238](https://doi.org/10.5551/jat.65238)
 """)
 st.info("[Lp(a) Clinical Guidance](https://www.lpaclinicalguidance.com/)")
 
-# --- 補足資料
 with st.expander("📊 補足資料：キットごと・換算法ごとのリスク分類比較"):
     st.markdown("""
-各キットごとに測定値（mg/dL）を入力してください。  
-IFCC換算値・2.2倍法換算値、それぞれでリスク分類を色分けして一覧表示します。  
+1つの値（mg/dL）を入力すると、すべてのキットで同じ値を使って換算・リスク分類を比較できます。  
 ⚠️マークが出ている場合は「2.2倍法」でリスクが過小評価されています。
     """)
 
-    user_inputs = {}
-    col_in = st.columns(len(kit_formulas))
-    for i, kit in enumerate(kit_formulas.keys()):
-        with col_in[i]:
-            user_inputs[kit] = st.number_input(f"{kit}\n(mg/dL)", min_value=0.0, step=0.1, key=f"supp_{kit}")
+    # ここで一括入力
+    common_value = st.number_input("共通の測定値を入力してください（mg/dL）", min_value=0.0, step=0.1, key="common_value")
 
     data = []
-    for kit, val in user_inputs.items():
-        a = kit_formulas[kit]["a"]
-        b = kit_formulas[kit]["b"]
-        if val > 0:
-            ifcc = a * val + b
-            x22  = val * 2.2
+    if common_value > 0:
+        for kit, f in kit_formulas.items():
+            a = f["a"]
+            b = f["b"]
+            ifcc = a * common_value + b
+            x22  = common_value * 2.2
             idx_ifcc = classify_lpa_risk(ifcc)
             idx_x22  = classify_lpa_risk(x22)
             row = {
                 "キット名": kit,
-                "入力値 (mg/dL)": val,
+                "入力値 (mg/dL)": common_value,
                 "IFCC換算値 (nmol/L)": round(ifcc, 2),
                 "IFCCリスク分類": risk_table[idx_ifcc]["class"],
                 "2.2倍法 (nmol/L)": round(x22, 2),
@@ -152,6 +147,7 @@ IFCC換算値・2.2倍法換算値、それぞれでリスク分類を色分け�
             data.append(row)
 
     if data:
+        import pandas as pd
         df = pd.DataFrame(data)
         def color_row(row):
             color_ifcc = f'background-color: {risk_table[classify_lpa_risk(row["IFCC換算値 (nmol/L)"])]["color"]}'
@@ -166,4 +162,4 @@ IFCC換算値・2.2倍法換算値、それぞれでリスク分類を色分け�
         )
         st.caption("⚠️ : 2.2倍法ではリスク分類が過小評価されることがあります。")
     else:
-        st.info("いずれかのキットに値を入力すると比較表が表示されます。")
+        st.info("値を入力すると比較表が表示されます。")
